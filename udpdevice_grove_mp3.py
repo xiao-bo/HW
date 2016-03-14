@@ -2,49 +2,47 @@ from twisted.internet import reactor
 from udpwkpf import WuClass, Device
 import sys
 import mraa
+import pyupm_wt5001 as upmWt5001
 
 from twisted.protocols import basic
 from twisted.internet import reactor, protocol
 
 if __name__ == "__main__":
-            
+
     class Grove_MP3(WuClass):
         def __init__(self):
             self.ID = 2011
+            self.myMP3Player = upmWt5001.WT5001(0)
             print "MP3 Actuator init success"
         def update(self,obj,pID,val):
-            if pID == 0:
-                if val == True:
-                    #self.light_actuator_gpio.write(1)
-                    print "MP3 Actuator On"
+	    ##get current play state 
+	    ps = upmWt5001.uint8Array(0)
+	    self.myMP3Player.getPlayState(ps)
+				
+	    on_off=obj.getProperty(0)##get on_off's property 
+	    track=obj.getProperty(1)##get track's property 
+            if on_off:
+                if ps:
+		    self.myMP3Player.play(upmWt5001.WT5001.SD, track)
+                    print "playing \n"
                 else:
-                    #self.light_actuator_gpio.write(0)
-                    print "MP3 Actuator Off"
+                    print "ps is fail\n"
             else:
-                print "MP3 Actuator error"
+                print "on_off is fail\n"
+
+            print "track:"+str(track)
+            print "on_off:"+str(on_off)
 
     class MyDevice(Device):
         def __init__(self,addr,localaddr):
             Device.__init__(self,addr,localaddr)
 
         def init(self):
-
+			
             self.m1 = Grove_MP3()
             self.addClass(self.m1,0)
             self.obj_grove_mp3 = self.addObject(self.m1.ID)
-			"""
-            self.m2 = Slider()
-            self.addClass(self.m2,0)
-            self.obj_slider = self.addObject(self.m2.ID)
-
-            self.m3 = Threshold()
-            self.addClass(self.m3,1)
-            self.obj_threshold = self.addObject(self.m3.ID)
-            reactor.callLater(1,self.loop)
-			"""
-        #def loop(self):
-            #self.obj_slider.setProperty(2, self.m2.current_value)
-            #reactor.callLater(1,self.loop)
+				
 
     if len(sys.argv) <= 2:
         print 'python udpwkpf.py <ip> <port>'
