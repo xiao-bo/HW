@@ -2,10 +2,10 @@ from twisted.internet import reactor
 from udpwkpf import WuClass, Device
 import sys
 import mraa
-import pyupm_i2clcd as lcd
 from twisted.protocols import basic
 from twisted.internet import reactor, protocol
 
+import pyupm_i2clcd as lcd
 if __name__ == "__main__":
             
     class Grove_LCD(WuClass):
